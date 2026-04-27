@@ -319,26 +319,43 @@ firebase.database().ref('.info/connected').on('value',snap=>{
   else{d.className='off';l.textContent='offline';}
 });
 
+// Save local state to Firebase without triggering a re-render
 function save(){
   clearTimeout(saveT);
+  render();        // immediate local update — no waiting
+  updateStats();
   saveT=setTimeout(()=>{
     flashSync();
     skipNext=true;
-    DB.set(S).then(()=>{ skipNext=false; });
+    DB.set(JSON.parse(JSON.stringify(S))).then(()=>{
+      setTimeout(()=>{ skipNext=false; }, 1000);
+    });
   },400);
 }
 
-DB.on('value',snap=>{
-  if(skipNext) return;
+// Initial load
+DB.once('value',snap=>{
   const d=snap.val();
   S = d ? d : JSON.parse(JSON.stringify(SEED));
   if(!S.members) S.members=[...SEED.members];
   if(!S.sections) S.sections=[];
-  if(!d) save();
+  if(!d) DB.set(S);
   document.getElementById('proj-title').value = S.project||'';
   render();
   document.getElementById('loading').style.display='none';
   document.getElementById('app').style.display='block';
+});
+
+// Listen for remote changes from other users
+DB.on('value',snap=>{
+  if(skipNext) return;
+  const d=snap.val();
+  if(!d) return;
+  S = d;
+  if(!S.members) S.members=[...SEED.members];
+  if(!S.sections) S.sections=[];
+  document.getElementById('proj-title').value = S.project||'';
+  render();
 });
 
 // ── Stats ─────────────────────────────────────────────────────────
