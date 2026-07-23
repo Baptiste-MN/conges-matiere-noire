@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leave Requests — Direction — Matière Noire</title>
+<style>
+  :root{
+    --ink:#1c1d1f; --paper:#f7f6f3; --line:#e2e0da;
+    --accent:#2f5d50; --accent-soft:#e7efec;
+    --warn:#b3541e; --warn-soft:#fbeee3;
+    --danger:#a4333b; --danger-soft:#f8e8e8;
+    --muted:#6f6d68; --grey:#8a8781; --grey-soft:#eeece7;
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Helvetica, Arial, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);padding:32px 16px 80px;}
+  .wrap{max-width:960px;margin:0 auto;}
+  header{
+    display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;
+    margin-bottom:28px;border-bottom:2px solid var(--ink);padding-bottom:16px;
+  }
+  h1{font-size:1.5rem;margin:0;letter-spacing:-0.02em;}
+  .subtitle{color:var(--muted);font-size:0.85rem;margin-top:4px;}
+  select#userSelect{
+    padding:8px 10px;border:1px solid var(--ink);background:white;border-radius:6px;
+    color:var(--ink);font-weight:600;
+  }
+  .card{background:white;border:1px solid var(--line);border-radius:12px;padding:22px;margin-bottom:24px;}
+  .card h2{font-size:1rem;margin:0 0 16px;text-transform:uppercase;letter-spacing:0.04em;color:var(--muted);}
+  label{display:block;font-size:0.8rem;font-weight:600;margin-bottom:6px;}
+  input[type=date], input[type=text], select.field, textarea{
+    padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);
+    font-family:inherit;font-size:0.9rem;
+  }
+  textarea{resize:vertical;min-height:40px;width:100%;}
+
+  .filters{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+  .filter-btn{padding:6px 12px;border-radius:20px;border:1px solid var(--line);background:white;color:var(--muted);font-size:0.82rem;cursor:pointer;}
+  .filter-btn.active{border-color:var(--ink);color:var(--ink);font-weight:700;}
+
+  .req{padding:14px 4px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;}
+  .req:last-child{border-bottom:none;}
+  .req-main{display:flex;flex-direction:column;gap:3px;min-width:240px;}
+  .req-name{font-weight:700;}
+  .req-dates{font-size:0.9rem;}
+  .req-meta{font-size:0.78rem;color:var(--muted);}
+  .overlap-warn{font-size:0.78rem;color:var(--warn);background:var(--warn-soft);border-radius:8px;padding:6px 9px;margin-top:6px;max-width:440px;}
+  .badge{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.03em;padding:4px 10px;border-radius:20px;white-space:nowrap;}
+  .badge.pending{background:var(--warn-soft);color:var(--warn);}
+  .badge.approved{background:var(--accent-soft);color:var(--accent);}
+  .badge.rejected{background:var(--danger-soft);color:var(--danger);}
+  .badge.cancelled{background:var(--grey-soft);color:var(--grey);}
+
+  .req-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+  .act-btn{border:1px solid var(--line);background:white;padding:6px 12px;border-radius:8px;font-size:0.8rem;font-weight:700;cursor:pointer;}
+  .act-btn.approve{color:var(--accent);border-color:var(--accent);}
+  .act-btn.approve:hover{background:var(--accent-soft);}
+  .act-btn.reject{color:var(--danger);border-color:var(--danger);}
+  .act-btn.reject:hover{background:var(--danger-soft);}
+  .act-btn.edit{color:var(--ink);}
+  .act-btn.edit:hover{background:var(--paper);}
+
+  .edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px;min-width:260px;}
+  .edit-grid .full{grid-column:1 / -1;}
+  .edit-actions{display:flex;gap:8px;margin-top:10px;}
+  .act-btn.save{color:white;background:var(--ink);border-color:var(--ink);}
+  .act-btn.cancel{color:var(--muted);}
+
+  .note-pill{font-size:0.8rem;background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-top:6px;max-width:420px;white-space:pre-wrap;}
+  .empty{color:var(--muted);font-size:0.9rem;padding:20px 0;text-align:center;}
+  .status-line{font-size:0.78rem;color:var(--muted);text-align:center;margin-top:20px;}
+  .placeholder{color:var(--muted);font-size:0.9rem;text-align:center;padding:30px 0;}
+  .hidden{display:none;}
+
+  .people-cols{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  .people-col h3{font-size:0.85rem;margin:0 0 10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.03em;}
+  .person-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);}
+  .person-row:last-child{border-bottom:none;}
+  .remove-x{cursor:pointer;color:var(--danger);font-weight:700;border:none;background:none;font-size:0.9rem;}
+  .add-row{display:flex;gap:8px;margin-top:10px;}
+  .add-row input{flex:1;}
+  .add-row button{border:1px solid var(--ink);background:white;border-radius:8px;padding:8px 12px;font-weight:600;cursor:pointer;}
+  .add-row button:hover{background:var(--ink);color:white;}
+  @media(max-width:600px){ .people-cols{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Leave Requests — Direction</h1>
+      <div class="subtitle">Matière Noire — internal tool</div>
+    </div>
+    <select id="userSelect"></select>
+  </header>
+
+  <div id="placeholder" class="placeholder">Select your name to get started.</div>
+
+  <div id="app" class="hidden">
+    <div class="card">
+      <h2>People</h2>
+      <div class="people-cols">
+        <div class="people-col">
+          <h3>Team (requesters)</h3>
+          <div id="empRows"></div>
+          <div class="add-row">
+            <input type="text" id="newEmployeeName" placeholder="Add a name…">
+            <button id="addEmployeeBtn">Add</button>
+          </div>
+        </div>
+        <div class="people-col">
+          <h3>Direction (approvers)</h3>
+          <div id="dirRows"></div>
+          <div class="add-row">
+            <input type="text" id="newDirectionName" placeholder="Add a name…">
+            <button id="addDirectionBtn">Add</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>All requests</h2>
+      <div class="filters" id="filters">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="pending">Pending</button>
+        <button class="filter-btn" data-filter="approved">Approved</button>
+        <button class="filter-btn" data-filter="rejected">Rejected</button>
+        <button class="filter-btn" data-filter="cancelled">Cancelled</button>
+      </div>
+      <div id="list"></div>
+    </div>
+
+    <div class="status-line" id="statusLine">Connecting…</div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+// Paste the SAME firebaseConfig object used in your other Matière Noire tools.
+const firebaseConfig = {
+  apiKey: "AIzaSyByf4SmnGJvfkkJVFhfINXikb8I8ge5VRU",
+  authDomain: "matiere-noire-todo.firebaseapp.com",
+  databaseURL: "https://matiere-noire-todo-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "matiere-noire-todo",
+  storageBucket: "matiere-noire-todo.firebasestorage.app",
+  messagingSenderId: "583651643354",
+  appId: "1:583651643354:web:74b78c43316b9d657dfae3"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const requestsRef = db.ref("conges");
+const employeesRef = db.ref("people/employees");
+const directionRef = db.ref("people/direction");
+
+const DEFAULT_EMPLOYEES = ["Aleksandra","Margot","Lucien","Priscille","Bensu","Orlando","Yoojin","Kaito"];
+const DEFAULT_DIRECTION = ["Baptiste","Sam","Pierre","Félix"];
+
+let currentUser = localStorage.getItem("conges-direction-user") || "";
+let employees = [];
+let direction = [];
+let requests = {};
+let activeFilter = "all";
+let editingId = null;
+
+const userSelect = document.getElementById("userSelect");
+const placeholder = document.getElementById("placeholder");
+const app = document.getElementById("app");
+const empRows = document.getElementById("empRows");
+const dirRows = document.getElementById("dirRows");
+const listEl = document.getElementById("list");
+const statusLine = document.getElementById("statusLine");
+
+function esc(s){
+  return String(s == null ? "" : s).replace(/[&<>"']/g, c => (
+    {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]
+  ));
+}
+function fmtDate(iso){ return new Date(iso).toLocaleDateString("en-GB", { day:"2-digit", month:"short", year:"numeric" }); }
+function fmtShort(iso){ return new Date(iso).toLocaleDateString("en-GB", { day:"2-digit", month:"short" }); }
+function calendarDays(start, end){ return Math.round((new Date(end) - new Date(start)) / (1000*60*60*24)) + 1; }
+function workingDays(start, end){
+  let count = 0; const d = new Date(start), last = new Date(end);
+  while (d <= last){ const day = d.getDay(); if (day !== 0 && day !== 6) count++; d.setDate(d.getDate()+1); }
+  return count;
+}
+function daysLabel(start, end){
+  const c = calendarDays(start, end), w = workingDays(start, end);
+  return `${c} calendar day${c>1?"s":""} · ${w} working day${w>1?"s":""}`;
+}
+// Two date ranges overlap if each starts on or before the other ends.
+function rangesOverlap(a, b){
+  return new Date(a.startDate) <= new Date(b.endDate) && new Date(b.startDate) <= new Date(a.endDate);
+}
+// Overlaps count only against pending/approved requests (not rejected/cancelled).
+function findOverlaps(id, r){
+  if (r.status === "rejected" || r.status === "cancelled") return [];
+  return Object.entries(requests)
+    .filter(([oid, o]) => oid !== id
+      && o.status !== "rejected" && o.status !== "cancelled"
+      && rangesOverlap(r, o))
+    .map(([, o]) => o);
+}
+
+employeesRef.once("value", snap => { if (snap.val() === null) employeesRef.set(DEFAULT_EMPLOYEES); });
+directionRef.once("value", snap => { if (snap.val() === null) directionRef.set(DEFAULT_DIRECTION); });
+
+function buildUserSelect(){
+  userSelect.innerHTML = `<option value="">Select your name</option>` +
+    direction.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join("");
+  userSelect.value = direction.includes(currentUser) ? currentUser : "";
+}
+
+function toggleView(){
+  if (currentUser){ placeholder.classList.add("hidden"); app.classList.remove("hidden"); }
+  else { placeholder.classList.remove("hidden"); app.classList.add("hidden"); }
+}
+
+userSelect.addEventListener("change", () => {
+  currentUser = userSelect.value;
+  localStorage.setItem("conges-direction-user", currentUser);
+  toggleView();
+  renderList();
+});
+
+// ---------- People ----------
+function renderPeople(){
+  empRows.innerHTML = employees.length
+    ? employees.map((n, i) => `
+        <div class="person-row"><span>${esc(n)}</span>
+          <button class="remove-x" data-list="employees" data-index="${i}">×</button></div>`).join("")
+    : `<div class="empty">No one yet.</div>`;
+  dirRows.innerHTML = direction.length
+    ? direction.map((n, i) => `
+        <div class="person-row"><span>${esc(n)}</span>
+          <button class="remove-x" data-list="direction" data-index="${i}">×</button></div>`).join("")
+    : `<div class="empty">No one yet.</div>`;
+}
+function removePerson(list, index){
+  const current = (list === "employees" ? employees : direction).slice();
+  const name = current[index];
+  if (name === undefined) return;
+  if (!confirm(`Remove ${name} from the list? Their past requests stay recorded.`)) return;
+  current.splice(index, 1);
+  (list === "employees" ? employeesRef : directionRef).set(current)
+    .catch(err => alert("Could not save: " + err.message));
+}
+function addPerson(list){
+  const input = document.getElementById(list === "employees" ? "newEmployeeName" : "newDirectionName");
+  const name = input.value.trim();
+  if (!name) return;
+  const current = (list === "employees" ? employees : direction);
+  if (current.includes(name)){ alert(`${name} is already on the list.`); return; }
+  (list === "employees" ? employeesRef : directionRef).set([...current, name])
+    .catch(err => alert("Could not save: " + err.message));
+  input.value = "";
+}
+document.addEventListener("click", e => {
+  const x = e.target.closest(".remove-x");
+  if (x){ removePerson(x.dataset.list, parseInt(x.dataset.index, 10)); }
+});
+document.getElementById("addEmployeeBtn").addEventListener("click", () => addPerson("employees"));
+document.getElementById("addDirectionBtn").addEventListener("click", () => addPerson("direction"));
+
+// ---------- Filters ----------
+document.getElementById("filters").addEventListener("click", e => {
+  const btn = e.target.closest(".filter-btn");
+  if (!btn) return;
+  document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  activeFilter = btn.dataset.filter;
+  renderList();
+});
+
+// ---------- Decisions & edits ----------
+function decide(id, status){
+  const update = { status, decidedBy: currentUser, decidedAt: Date.now() };
+  requests[id] = { ...requests[id], ...update };
+  renderList();
+  requestsRef.child(id).update(update).catch(err => alert("Could not save: " + err.message));
+}
+function startEdit(id){ editingId = id; renderList(); }
+function cancelEdit(){ editingId = null; renderList(); }
+function saveEdit(id){
+  const start = document.getElementById(`edit-start-${id}`).value;
+  const end = document.getElementById(`edit-end-${id}`).value;
+  const type = document.getElementById(`edit-type-${id}`).value;
+  const note = document.getElementById(`edit-note-${id}`).value.trim();
+  if (!start || !end || new Date(end) < new Date(start)){ alert("Please pick a valid date range."); return; }
+  const update = { startDate: start, endDate: end, type, note };
+  requests[id] = { ...requests[id], ...update };
+  editingId = null;
+  renderList();
+  requestsRef.child(id).update(update).catch(err => alert("Could not save: " + err.message));
+}
+
+// ---------- List ----------
+function renderList(){
+  if (!currentUser) return;
+  const entries = Object.entries(requests)
+    .filter(([, r]) => activeFilter === "all" || r.status === activeFilter)
+    .sort((a,b) => b[1].createdAt - a[1].createdAt);
+
+  if (entries.length === 0){ listEl.innerHTML = `<div class="empty">No requests here.</div>`; return; }
+  listEl.innerHTML = entries.map(([id, r]) => renderRequest(id, r)).join("");
+}
+
+function renderRequest(id, r){
+  if (editingId === id){
+    const typeOptions = ["Congés payés","RTT","Sans solde","Arrêt maladie","Autre"]
+      .map(t => `<option ${t === r.type ? "selected" : ""}>${t}</option>`).join("");
+    return `
+      <div class="req">
+        <div class="req-main" style="flex:1;">
+          <div class="req-name">${esc(r.name)} <span style="font-weight:400;color:var(--muted);">· editing</span></div>
+          <div class="edit-grid">
+            <div><label>Start date</label><input type="date" id="edit-start-${id}" value="${r.startDate}"></div>
+            <div><label>End date</label><input type="date" id="edit-end-${id}" value="${r.endDate}"></div>
+            <div class="full"><label>Type</label>
+              <select class="field" id="edit-type-${id}" style="width:100%;">${typeOptions}</select></div>
+            <div class="full"><label>Note</label>
+              <textarea id="edit-note-${id}">${esc(r.note || "")}</textarea></div>
+          </div>
+          <div class="edit-actions">
+            <button class="act-btn save" data-action="save" data-id="${id}">Save</button>
+            <button class="act-btn cancel" data-action="cancel">Cancel</button>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  const decidedLine = r.decidedBy
+    ? `<div class="req-meta">${r.status === "approved" ? "Approved" : "Rejected"} by ${esc(r.decidedBy)} · ${fmtDate(r.decidedAt)}</div>`
+    : "";
+
+  const overlaps = findOverlaps(id, r);
+  const overlapLine = overlaps.length
+    ? `<div class="overlap-warn">⚠ Overlaps with ${overlaps.map(o => `${esc(o.name)} (${fmtShort(o.startDate)}–${fmtShort(o.endDate)})`).join(", ")}</div>`
+    : "";
+
+  return `
+    <div class="req">
+      <div class="req-main">
+        <div class="req-name">${esc(r.name)} <span style="font-weight:400;color:var(--muted);">· ${esc(r.type)}</span></div>
+        <div class="req-dates">${fmtDate(r.startDate)} → ${fmtDate(r.endDate)} <span style="font-weight:400;color:var(--muted);">(${daysLabel(r.startDate, r.endDate)})</span></div>
+        ${r.note ? `<div class="note-pill">${esc(r.note)}</div>` : ""}
+        ${overlapLine}
+        ${decidedLine}
+      </div>
+      <div class="req-actions">
+        <span class="badge ${r.status}">${r.status}</span>
+        <button class="act-btn edit" data-action="edit" data-id="${id}">Edit</button>
+        ${r.status === "pending" ? `
+          <button class="act-btn approve" data-action="approve" data-id="${id}">Approve</button>
+          <button class="act-btn reject" data-action="reject" data-id="${id}">Reject</button>
+        ` : ""}
+      </div>
+    </div>`;
+}
+
+listEl.addEventListener("click", e => {
+  const btn = e.target.closest("[data-action]");
+  if (!btn) return;
+  const id = btn.dataset.id;
+  switch (btn.dataset.action){
+    case "edit":    startEdit(id); break;
+    case "cancel":  cancelEdit(); break;
+    case "save":    saveEdit(id); break;
+    case "approve": decide(id, "approved"); break;
+    case "reject":  decide(id, "rejected"); break;
+  }
+});
+
+// ---------- Firebase sync ----------
+employeesRef.on("value", snap => { employees = snap.val() || DEFAULT_EMPLOYEES; renderPeople(); });
+directionRef.on("value", snap => {
+  direction = snap.val() || DEFAULT_DIRECTION;
+  buildUserSelect(); toggleView(); renderPeople();
+});
+requestsRef.on("value", snap => {
+  requests = snap.val() || {};
+  statusLine.textContent = "Synced";
+  if (editingId === null) renderList();
+}, err => {
+  statusLine.textContent = "Connection error: " + err.message;
+});
+
+toggleView();
+</script>
+</body>
+</html>
