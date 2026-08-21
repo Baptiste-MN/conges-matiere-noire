@@ -1,346 +1,412 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My Leave Requests — Matière Noire</title>
+<title>Congés — Matière Noire</title>
 <style>
   :root{
-    --ink:#1c1d1f; --paper:#f7f6f3; --line:#e2e0da;
+    --ink:#1c1d1f; --paper:#f7f6f3; --line:#e2e0da; --white:#fff;
     --accent:#2f5d50; --accent-soft:#e7efec;
     --warn:#b3541e; --warn-soft:#fbeee3;
     --danger:#a4333b; --danger-soft:#f8e8e8;
     --muted:#6f6d68; --grey:#8a8781; --grey-soft:#eeece7;
-    font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Helvetica, Arial, sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    font-family:-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",Helvetica,Arial,sans-serif;
   }
-  *{box-sizing:border-box;}
-  body{margin:0;background:var(--paper);color:var(--ink);padding:32px 16px 80px;}
-  .wrap{max-width:760px;margin:0 auto;}
-  header{
-    display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;
-    margin-bottom:28px;border-bottom:2px solid var(--ink);padding-bottom:16px;
-  }
-  h1{font-size:1.5rem;margin:0;letter-spacing:-0.02em;}
-  .subtitle{color:var(--muted);font-size:0.85rem;margin-top:4px;}
-  select#userSelect{
-    padding:8px 10px;border:1px solid var(--ink);background:white;border-radius:6px;
-    color:var(--ink);font-weight:600;
-  }
-  .card{background:white;border:1px solid var(--line);border-radius:12px;padding:22px;margin-bottom:24px;}
-  .card h2{font-size:1rem;margin:0 0 16px;text-transform:uppercase;letter-spacing:0.04em;color:var(--muted);}
-  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-  .form-grid .full{grid-column:1 / -1;}
-  label{display:block;font-size:0.8rem;font-weight:600;margin-bottom:6px;}
-  input[type=date], select.field, textarea{
-    width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);
-    font-family:inherit;font-size:0.95rem;
-  }
-  textarea{resize:vertical;min-height:56px;}
-  .days-hint{font-size:0.8rem;color:var(--muted);margin-top:4px;}
-  button.primary{
-    margin-top:18px;background:var(--ink);color:white;border:none;padding:11px 20px;
-    border-radius:8px;font-weight:600;cursor:pointer;
-  }
-  button.primary:disabled{background:#c9c7c1;cursor:not-allowed;}
-  button.primary:hover:not(:disabled){opacity:0.88;}
-  .req{padding:14px 4px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;}
-  .req:last-child{border-bottom:none;}
-  .req-main{display:flex;flex-direction:column;gap:3px;}
-  .req-dates{font-weight:700;}
-  .req-meta{font-size:0.8rem;color:var(--muted);}
-  .req-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-  .badge{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.03em;padding:4px 10px;border-radius:20px;white-space:nowrap;}
-  .badge.pending{background:var(--warn-soft);color:var(--warn);}
-  .badge.approved{background:var(--accent-soft);color:var(--accent);}
-  .badge.rejected{background:var(--danger-soft);color:var(--danger);}
-  .badge.cancelled{background:var(--grey-soft);color:var(--grey);}
-  .act-btn{border:1px solid var(--line);background:white;padding:6px 12px;border-radius:8px;font-size:0.8rem;font-weight:700;cursor:pointer;}
-  .act-btn.withdraw{color:var(--danger);border-color:var(--danger);}
-  .act-btn.withdraw:hover{background:var(--danger-soft);}
-  .empty{color:var(--muted);font-size:0.9rem;padding:20px 0;text-align:center;}
-  .note-pill{font-size:0.8rem;background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-top:6px;max-width:420px;white-space:pre-wrap;}
-  .status-line{font-size:0.78rem;color:var(--muted);text-align:center;margin-top:20px;}
-  .placeholder{color:var(--muted);font-size:0.9rem;text-align:center;padding:30px 0;}
-  .hidden{display:none;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);padding:30px 16px 80px}
+  .wrap{max-width:980px;margin:0 auto}
+  header{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;
+    margin-bottom:20px;border-bottom:2px solid var(--ink);padding-bottom:16px}
+  h1{font-size:1.5rem;margin:0;letter-spacing:-0.02em}
+  .subtitle{color:var(--muted);font-size:.85rem;margin-top:4px}
+  .head-right{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  select#userSelect{padding:8px 10px;border:1px solid var(--ink);background:var(--white);border-radius:6px;font-weight:600}
+
+  /* onglets */
+  nav.tabs{display:flex;gap:4px;margin-bottom:22px;flex-wrap:wrap}
+  nav.tabs button{background:none;border:0;border-bottom:2px solid transparent;padding:8px 14px;cursor:pointer;
+    font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+  nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
+  nav.tabs button.lock{opacity:.4}
+
+  .card{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:22px;margin-bottom:22px}
+  .card h2{font-size:1rem;margin:0 0 16px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .form-grid .full{grid-column:1/-1}
+  label{display:block;font-size:.8rem;font-weight:600;margin-bottom:6px}
+  input[type=date],select.field,textarea,input.txt{width:100%;padding:9px 10px;border:1px solid var(--line);
+    border-radius:8px;background:var(--paper);color:var(--ink);font-family:inherit;font-size:.95rem}
+  textarea{resize:vertical;min-height:56px}
+  .days-hint{font-size:.8rem;color:var(--muted);margin-top:4px}
+  button.primary{margin-top:18px;background:var(--ink);color:#fff;border:0;padding:11px 20px;border-radius:8px;font-weight:600;cursor:pointer}
+  button.primary:disabled{background:#c9c7c1;cursor:not-allowed}
+  button.primary:hover:not(:disabled){opacity:.88}
+  .btn{border:1px solid var(--line);background:var(--white);padding:7px 13px;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer}
+  .btn:hover{border-color:var(--ink)}
+  .btn.dark{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+  .req{padding:14px 4px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;
+    align-items:flex-start;gap:14px;flex-wrap:wrap}
+  .req:last-child{border-bottom:none}
+  .req-main{display:flex;flex-direction:column;gap:3px;flex:1;min-width:260px}
+  .req-dates{font-weight:700}
+  .req-meta{font-size:.8rem;color:var(--muted)}
+  .req-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .badge{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.03em;padding:4px 10px;border-radius:20px;white-space:nowrap}
+  .badge.pending{background:var(--warn-soft);color:var(--warn)}
+  .badge.approved{background:var(--accent-soft);color:var(--accent)}
+  .badge.rejected{background:var(--danger-soft);color:var(--danger)}
+  .badge.cancelled{background:var(--grey-soft);color:var(--grey)}
+  .act-btn{border:1px solid var(--line);background:var(--white);padding:6px 12px;border-radius:8px;font-size:.8rem;font-weight:700;cursor:pointer}
+  .act-btn.withdraw,.act-btn.reject{color:var(--danger);border-color:var(--danger)}
+  .act-btn.withdraw:hover,.act-btn.reject:hover{background:var(--danger-soft)}
+  .act-btn.approve{color:var(--accent);border-color:var(--accent)}
+  .act-btn.approve:hover{background:var(--accent-soft)}
+  .empty{color:var(--muted);font-size:.9rem;padding:20px 0;text-align:center}
+  .note-pill{font-size:.8rem;background:var(--paper);border:1px solid var(--line);border-radius:8px;
+    padding:8px 10px;margin-top:6px;max-width:460px;white-space:pre-wrap}
+  .overlap{font-size:.78rem;color:var(--warn);margin-top:5px}
+  .status-line{font-size:.78rem;color:var(--muted);text-align:center;margin-top:18px}
+  .placeholder{color:var(--muted);font-size:.9rem;text-align:center;padding:34px 0}
+  .hidden{display:none!important}
+  .filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+  .filter-btn{border:1px solid var(--line);background:var(--white);padding:6px 13px;border-radius:20px;
+    font-size:.78rem;font-weight:600;cursor:pointer;color:var(--muted)}
+  .filter-btn.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .who{font-family:var(--mono);font-size:.72rem;color:var(--muted)}
+  .kpi{display:flex;gap:26px;flex-wrap:wrap;margin-bottom:16px;font-family:var(--mono);font-size:.62rem;
+    letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+  .kpi span{display:block;font-size:1.35rem;color:var(--ink);letter-spacing:-.02em;margin-top:2px}
+  .lock-note{background:var(--warn-soft);border:1px solid var(--line);border-radius:10px;padding:14px 16px;
+    font-size:.85rem;color:var(--ink);display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
     <div>
-      <h1>My Leave Requests</h1>
-      <div class="subtitle">Matière Noire — internal tool</div>
+      <h1>Congés</h1>
+      <div class="subtitle">Matière Noire — outil interne</div>
     </div>
-    <select id="userSelect"></select>
+    <div class="head-right">
+      <select id="userSelect"></select>
+      <span class="who" id="who"></span>
+      <button class="btn" id="authBtn">Accès direction</button>
+    </div>
   </header>
 
-  <div id="placeholder" class="placeholder">Select your name to get started.</div>
+  <nav class="tabs">
+    <button data-v="me" aria-selected="true">Mes demandes</button>
+    <button data-v="dir" aria-selected="false" class="lock">Direction</button>
+    <button data-v="people" aria-selected="false" class="lock">Équipe</button>
+  </nav>
 
-  <div id="app" class="hidden">
-    <div class="card">
-      <h2>New request</h2>
-      <div class="form-grid">
-        <div>
-          <label>Start date</label>
-          <input type="date" id="startDate">
+  <!-- ══════ ESPACE SALARIÉ ══════ -->
+  <section id="v-me">
+    <div id="placeholder" class="placeholder">Sélectionne ton nom pour commencer.</div>
+    <div id="app" class="hidden">
+      <div class="card">
+        <h2>Nouvelle demande</h2>
+        <div class="form-grid">
+          <div><label>Date de début</label><input type="date" id="startDate"></div>
+          <div><label>Date de fin</label><input type="date" id="endDate"></div>
+          <div class="full"><label>Type</label>
+            <select class="field" id="leaveType">
+              <option>Congés payés</option><option>RTT</option><option>Sans solde</option>
+              <option>Arrêt maladie</option><option>Autre</option>
+            </select></div>
+          <div class="full"><label>Note (facultatif)</label><textarea id="note" placeholder="Un contexte utile pour la direction…"></textarea></div>
+          <div class="full days-hint" id="daysHint"></div>
         </div>
-        <div>
-          <label>End date</label>
-          <input type="date" id="endDate">
-        </div>
-        <div class="full">
-          <label>Type</label>
-          <select class="field" id="leaveType">
-            <option>Congés payés</option>
-            <option>RTT</option>
-            <option>Sans solde</option>
-            <option>Arrêt maladie</option>
-            <option>Autre</option>
-          </select>
-        </div>
-        <div class="full">
-          <label>Note (optional)</label>
-          <textarea id="note" placeholder="Any context for the approver..."></textarea>
-        </div>
-        <div class="full days-hint" id="daysHint"></div>
+        <button class="primary" id="submitBtn">Envoyer la demande</button>
       </div>
-      <button class="primary" id="submitBtn">Submit request</button>
+      <div class="card"><h2>Mes demandes</h2><div id="list"></div></div>
     </div>
+  </section>
 
-    <div class="card">
-      <h2>My requests</h2>
-      <div id="list"></div>
+  <!-- ══════ ESPACE DIRECTION ══════ -->
+  <section id="v-dir" class="hidden">
+    <div id="dirLock" class="lock-note">
+      <span>Cet espace est réservé à la direction.</span>
+      <button class="btn dark" id="authBtn2">Se connecter avec Google</button>
     </div>
+    <div id="dirApp" class="hidden">
+      <div class="kpi" id="dirKpi"></div>
+      <div class="card">
+        <h2>Toutes les demandes</h2>
+        <div class="filters" id="filters">
+          <button class="filter-btn active" data-filter="pending">En attente</button>
+          <button class="filter-btn" data-filter="approved">Validées</button>
+          <button class="filter-btn" data-filter="rejected">Refusées</button>
+          <button class="filter-btn" data-filter="cancelled">Annulées</button>
+          <button class="filter-btn" data-filter="all">Toutes</button>
+        </div>
+        <div id="dirList"></div>
+      </div>
+    </div>
+  </section>
 
-    <div class="status-line" id="statusLine">Connecting…</div>
-  </div>
+  <!-- ══════ ÉQUIPE ══════ -->
+  <section id="v-people" class="hidden">
+    <div id="peopleLock" class="lock-note">
+      <span>La gestion de l'équipe est réservée à la direction.</span>
+      <button class="btn dark" id="authBtn3">Se connecter avec Google</button>
+    </div>
+    <div id="peopleApp" class="hidden">
+      <div class="card">
+        <h2>Équipe</h2>
+        <p class="days-hint" id="refInfo" style="margin:-8px 0 14px"></p>
+        <div id="peopleRows"></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="status-line" id="statusLine">Connexion…</div>
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-<script>
-// Paste the SAME firebaseConfig object used in your other Matière Noire tools.
-const firebaseConfig = {
-  apiKey: "AIzaSyByf4SmnGJvfkkJVFhfINXikb8I8ge5VRU",
-  authDomain: "matiere-noire-todo.firebaseapp.com",
-  databaseURL: "https://matiere-noire-todo-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "matiere-noire-todo",
-  storageBucket: "matiere-noire-todo.firebasestorage.app",
-  messagingSenderId: "583651643354",
-  appId: "1:583651643354:web:74b78c43316b9d657dfae3"
+<script type="module">
+import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import {getDatabase,ref,onValue,set,update,push,child}
+  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+import {getAuth,GoogleAuthProvider,signInWithPopup,signOut,onAuthStateChanged}
+  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+
+const CFG={apiKey:"AIzaSyByf4SmnGJvfkkJVFhfINXikb8I8ge5VRU",
+  authDomain:"matiere-noire-todo.firebaseapp.com",
+  databaseURL:"https://matiere-noire-todo-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId:"matiere-noire-todo",storageBucket:"matiere-noire-todo.firebasestorage.app",
+  messagingSenderId:"583651643354",appId:"1:583651643354:web:74b78c43316b9d657dfae3"};
+const app0=initializeApp(CFG), db=getDatabase(app0), auth=getAuth(app0);
+
+const R_REQ='conges', R_REF='referentiel/people', R_LEG='people/employees';
+
+/* ═══ Adresses autorisées à accéder à l'espace direction ═══
+   À garder identiques à celles des règles Firebase (branche prive/). */
+const ADMINS=[
+  'baptiste@matiere-noire.paris',
+  'felix@matiere-noire.paris',
+  'pierre@matiere-noire.paris',
+  'sam@matiere-noire.paris'
+];
+const estAdmin=u=>!!u&&u.emailVerified&&ADMINS.includes((u.email||'').toLowerCase());
+let requests={}, people=[], user=null, currentUser=localStorage.getItem('conges-user')||'',
+    activeFilter='pending', editingId=null, vue='me';
+
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=iso=>new Date(iso).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'});
+
+/* ── jours fériés français ── */
+const _hc={};
+function easter(y){const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),
+ g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,
+ m=Math.floor((a+11*h+22*l)/451);return new Date(y,Math.floor((h+l-7*m+114)/31)-1,((h+l-7*m+114)%31)+1);}
+const p2=n=>String(n).padStart(2,'0');
+const ymd=d=>`${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`;
+function feries(y){
+  if(_hc[y])return _hc[y];
+  const s=new Set([`${y}-01-01`,`${y}-05-01`,`${y}-05-08`,`${y}-07-14`,`${y}-08-15`,`${y}-11-01`,`${y}-11-11`,`${y}-12-25`]);
+  const E=easter(y);[1,39,50].forEach(o=>{const d=new Date(E);d.setDate(d.getDate()+o);s.add(ymd(d));});
+  return _hc[y]=s;
+}
+const pl=iso=>{const[y,m,d]=iso.split('-').map(Number);return new Date(y,m-1,d);};
+const calJ=(a,b)=>Math.round((pl(b)-pl(a))/864e5)+1;
+function ouvres(a,b){let n=0;const d=pl(a),last=pl(b);
+  while(d<=last){const w=d.getDay();if(w!==0&&w!==6&&!feries(d.getFullYear()).has(ymd(d)))n++;d.setDate(d.getDate()+1);}return n;}
+const label=(a,b)=>{const c=calJ(a,b),w=ouvres(a,b);return `${c} jour${c>1?'s':''} calendaire${c>1?'s':''} · ${w} ouvré${w>1?'s':''}`;};
+const overlap=(a,b)=>new Date(a.startDate)<=new Date(b.endDate)&&new Date(b.startDate)<=new Date(a.endDate);
+function chevauche(id,r){
+  if(r.status==='rejected'||r.status==='cancelled')return[];
+  return Object.entries(requests).filter(([o,x])=>o!==id&&x.status!=='rejected'&&x.status!=='cancelled'&&overlap(r,x)).map(([,x])=>x);
+}
+
+/* ── navigation ── */
+document.querySelectorAll('nav.tabs button').forEach(b=>b.onclick=()=>{
+  if(b.classList.contains('lock')&&!user){ b.dataset.v==='dir'?$('#v-dir').classList.remove('hidden'):null; }
+  vue=b.dataset.v;
+  document.querySelectorAll('nav.tabs button').forEach(x=>x.setAttribute('aria-selected',x===b));
+  ['me','dir','people'].forEach(v=>$('#v-'+v).classList.toggle('hidden',v!==vue));
+  render();
+});
+
+/* ── authentification ── */
+[$('#authBtn'),$('#authBtn2'),$('#authBtn3')].forEach(b=>b&&(b.onclick=async()=>{
+  if(user){await signOut(auth);return;}
+  try{const p=new GoogleAuthProvider();p.setCustomParameters({prompt:'select_account'});await signInWithPopup(auth,p);}
+  catch(e){$('#statusLine').textContent=location.protocol==='file:'
+    ?"Connexion impossible en local — ouvre la page en ligne."
+    :"Connexion refusée : "+e.message;}
+}));
+onAuthStateChanged(auth,u=>{
+  const ok=estAdmin(u);
+  user=ok?u:null;
+  $('#who').textContent=u?(ok?u.email:u.email+' — non autorisé'):'';
+  $('#authBtn').textContent=u?'Se déconnecter':'Accès direction';
+  document.querySelectorAll('nav.tabs button.lock').forEach(b=>b.classList.toggle('lock',!ok));
+  $('#dirLock').classList.toggle('hidden',ok);
+  $('#dirApp').classList.toggle('hidden',!ok);
+  $('#peopleLock').classList.toggle('hidden',ok);
+  $('#peopleApp').classList.toggle('hidden',!ok);
+  if(u&&!ok){
+    const msg="Ce compte n'a pas accès à l'espace direction.";
+    $('#dirLock').querySelector('span').textContent=msg;
+    $('#peopleLock').querySelector('span').textContent=msg;
+  }
+  render();
+});
+
+/* ── données ── */
+onValue(ref(db,R_REF),s=>{
+  const v=s.val();
+  if(Array.isArray(v)&&v.length){
+    const today=new Date().toISOString().slice(0,10);
+    people=v.filter(p=>!p.archive&&p.categorie!=='prestataire'
+              &&(p.periodes||[]).some(x=>(!x.debut||x.debut<=today)&&(!x.fin||x.fin>=today)))
+            .map(p=>p.nom).sort((a,b)=>a.localeCompare(b,'fr'));
+    $('#refInfo').textContent="Liste issue du référentiel — elle se met à jour toute seule depuis l'administration.";
+  }
+  buildSelect(); render();
+},()=>{
+  onValue(ref(db,R_LEG),s2=>{ people=s2.val()||[]; buildSelect(); render(); });
+});
+onValue(ref(db,R_REQ),s=>{ requests=s.val()||{}; $('#statusLine').textContent='Synchronisé'; render(); },
+  e=>$('#statusLine').textContent='Erreur de connexion : '+e.message);
+
+function buildSelect(){
+  const sel=$('#userSelect'), cur=sel.value||currentUser;
+  sel.innerHTML='<option value="">Sélectionne ton nom</option>'+people.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
+  sel.value=people.includes(cur)?cur:'';
+  currentUser=sel.value;
+}
+$('#userSelect').onchange=e=>{currentUser=e.target.value;localStorage.setItem('conges-user',currentUser);render();};
+
+/* ── rendu ── */
+function render(){ vue==='me'?renderMe():vue==='dir'?renderDir():renderPeople(); }
+
+function renderMe(){
+  $('#placeholder').classList.toggle('hidden',!!currentUser);
+  $('#app').classList.toggle('hidden',!currentUser);
+  if(!currentUser)return;
+  const mine=Object.entries(requests).filter(([,r])=>r.name===currentUser).sort((a,b)=>b[1].createdAt-a[1].createdAt);
+  $('#list').innerHTML=mine.length?mine.map(([id,r])=>`
+    <div class="req"><div class="req-main">
+      <div class="req-dates">${fmt(r.startDate)} → ${fmt(r.endDate)}
+        <span style="font-weight:400;color:var(--muted)">(${label(r.startDate,r.endDate)}) · ${esc(r.type)}</span></div>
+      ${r.note?`<div class="note-pill">${esc(r.note)}</div>`:''}
+      ${r.decidedBy?`<div class="req-meta">${r.status==='approved'?'Validée':'Refusée'} par ${esc(r.decidedBy)} · ${fmt(r.decidedAt)}</div>`:''}
+    </div><div class="req-right"><span class="badge ${r.status}">${etat(r.status)}</span>
+      ${r.status==='pending'?`<button class="act-btn withdraw" data-w="${id}">Retirer</button>`:''}
+    </div></div>`).join(''):'<div class="empty">Aucune demande pour le moment.</div>';
+  $('#list').querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>retirer(b.dataset.w));
+}
+const etat=s=>({pending:'en attente',approved:'validée',rejected:'refusée',cancelled:'annulée'}[s]||s);
+
+function renderDir(){
+  if(!user)return;
+  const all=Object.entries(requests);
+  const att=all.filter(([,r])=>r.status==='pending').length;
+  const val=all.filter(([,r])=>r.status==='approved');
+  const jours=val.reduce((s,[,r])=>s+ouvres(r.startDate,r.endDate),0);
+  $('#dirKpi').innerHTML=`
+    <div>En attente<span>${att}</span></div>
+    <div>Validées<span>${val.length}</span></div>
+    <div>Jours ouvrés validés<span>${jours}</span></div>
+    <div>Personnes<span>${people.length}</span></div>`;
+  const list=all.filter(([,r])=>activeFilter==='all'||r.status===activeFilter)
+                .sort((a,b)=>new Date(a[1].startDate)-new Date(b[1].startDate));
+  $('#dirList').innerHTML=list.length?list.map(([id,r])=>{
+    if(editingId===id)return `
+      <div class="req"><div class="req-main" style="gap:8px">
+        <div class="form-grid">
+          <div><label>Début</label><input type="date" id="e-s-${id}" value="${r.startDate}"></div>
+          <div><label>Fin</label><input type="date" id="e-e-${id}" value="${r.endDate}"></div>
+          <div class="full"><label>Type</label><select class="field" id="e-t-${id}">
+            ${['Congés payés','RTT','Sans solde','Arrêt maladie','Autre'].map(t=>`<option${t===r.type?' selected':''}>${t}</option>`).join('')}</select></div>
+          <div class="full"><label>Note</label><textarea id="e-n-${id}">${esc(r.note||'')}</textarea></div>
+        </div>
+        <div class="req-right"><button class="act-btn approve" data-save="${id}">Enregistrer</button>
+          <button class="act-btn" data-cancel>Annuler</button></div>
+      </div></div>`;
+    const ov=chevauche(id,r);
+    return `<div class="req"><div class="req-main">
+      <div class="req-dates">${esc(r.name)} · ${fmt(r.startDate)} → ${fmt(r.endDate)}
+        <span style="font-weight:400;color:var(--muted)">(${label(r.startDate,r.endDate)}) · ${esc(r.type)}</span></div>
+      ${r.note?`<div class="note-pill">${esc(r.note)}</div>`:''}
+      ${ov.length?`<div class="overlap">Chevauche ${ov.length} autre${ov.length>1?'s':''} absence${ov.length>1?'s':''} : ${ov.map(o=>esc(o.name)).join(', ')}</div>`:''}
+      ${r.decidedBy?`<div class="req-meta">${r.status==='approved'?'Validée':'Refusée'} par ${esc(r.decidedBy)} · ${fmt(r.decidedAt)}</div>`:''}
+    </div><div class="req-right">
+      <span class="badge ${r.status}">${etat(r.status)}</span>
+      ${r.status==='pending'?`<button class="act-btn approve" data-a="${id}">Valider</button>
+        <button class="act-btn reject" data-r="${id}">Refuser</button>`:''}
+      <button class="act-btn" data-e="${id}">Modifier</button>
+    </div></div>`;
+  }).join(''):'<div class="empty">Aucune demande dans ce filtre.</div>';
+
+  $('#dirList').querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>decider(b.dataset.a,'approved'));
+  $('#dirList').querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>decider(b.dataset.r,'rejected'));
+  $('#dirList').querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>{editingId=b.dataset.e;renderDir();});
+  $('#dirList').querySelectorAll('[data-cancel]').forEach(b=>b.onclick=()=>{editingId=null;renderDir();});
+  $('#dirList').querySelectorAll('[data-save]').forEach(b=>b.onclick=()=>sauver(b.dataset.save));
+}
+$('#filters').onclick=e=>{
+  const b=e.target.closest('.filter-btn'); if(!b)return;
+  document.querySelectorAll('.filter-btn').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active'); activeFilter=b.dataset.filter; renderDir();
 };
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-const requestsRef = db.ref("conges");
-const employeesRef = db.ref("people/employees");
-const directionRef = db.ref("people/direction");
 
-const DEFAULT_EMPLOYEES = ["Aleksandra","Margot","Lucien","Priscille","Bensu","Orlando","Yoojin","Kaito"];
-const DEFAULT_DIRECTION = ["Baptiste","Sam","Pierre","Félix"];
-
-let currentUser = localStorage.getItem("conges-user") || "";
-let employees = [];
-let requests = {};
-
-const userSelect = document.getElementById("userSelect");
-const placeholder = document.getElementById("placeholder");
-const app = document.getElementById("app");
-const listEl = document.getElementById("list");
-const statusLine = document.getElementById("statusLine");
-
-function esc(s){
-  return String(s == null ? "" : s).replace(/[&<>"']/g, c => (
-    {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]
-  ));
-}
-function fmtDate(iso){
-  return new Date(iso).toLocaleDateString("en-GB", { day:"2-digit", month:"short", year:"numeric" });
-}
-// ---- French national public holidays (métropole), computed per year ----
-const _holidayCache = {};
-function easterSunday(year){
-  // Meeus/Jones/Butcher Gregorian algorithm
-  const a=year%19, b=Math.floor(year/100), c=year%100;
-  const d=Math.floor(b/4), e=b%4, f=Math.floor((b+8)/25);
-  const g=Math.floor((b-f+1)/3), h=(19*a+b-d-g+15)%30;
-  const i=Math.floor(c/4), k=c%4, l=(32+2*e+2*i-h-k)%7;
-  const m=Math.floor((a+11*h+22*l)/451);
-  const month=Math.floor((h+l-7*m+114)/31);
-  const day=((h+l-7*m+114)%31)+1;
-  return new Date(year, month-1, day);
-}
-function pad2(n){ return String(n).padStart(2,"0"); }
-function ymdLocal(d){ return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; }
-function holidaysForYear(year){
-  if (_holidayCache[year]) return _holidayCache[year];
-  const set = new Set([
-    `${year}-01-01`, // Jour de l'an
-    `${year}-05-01`, // Fête du travail
-    `${year}-05-08`, // Victoire 1945
-    `${year}-07-14`, // Fête nationale
-    `${year}-08-15`, // Assomption
-    `${year}-11-01`, // Toussaint
-    `${year}-11-11`, // Armistice
-    `${year}-12-25`  // Noël
-  ]);
-  const easter = easterSunday(year);
-  const addOffset = off => { const d = new Date(easter); d.setDate(d.getDate()+off); set.add(ymdLocal(d)); };
-  addOffset(1);  // Lundi de Pâques
-  addOffset(39); // Ascension
-  addOffset(50); // Lundi de Pentecôte
-  _holidayCache[year] = set;
-  return set;
-}
-// Parse "YYYY-MM-DD" as a local-midnight date (avoids timezone drift).
-function parseLocal(iso){ const [y,m,d] = iso.split("-").map(Number); return new Date(y, m-1, d); }
-function calendarDays(start, end){
-  return Math.round((parseLocal(end) - parseLocal(start)) / (1000*60*60*24)) + 1;
-}
-function workingDays(start, end){
-  let count = 0;
-  const d = parseLocal(start), last = parseLocal(end);
-  while (d <= last){
-    const day = d.getDay(); // 0 = Sun, 6 = Sat
-    const isWeekend = (day === 0 || day === 6);
-    const isHoliday = holidaysForYear(d.getFullYear()).has(ymdLocal(d));
-    if (!isWeekend && !isHoliday) count++;
-    d.setDate(d.getDate() + 1);
-  }
-  return count;
-}
-function daysLabel(start, end){
-  const c = calendarDays(start, end), w = workingDays(start, end);
-  return `${c} calendar day${c>1?"s":""} · ${w} working day${w>1?"s":""}`;
+function renderPeople(){
+  if(!user)return;
+  const today=new Date().toISOString().slice(0,10);
+  $('#peopleRows').innerHTML=people.length?people.map(n=>{
+    const dem=Object.values(requests).filter(r=>r.name===n);
+    const j=dem.filter(r=>r.status==='approved').reduce((s,r)=>s+ouvres(r.startDate,r.endDate),0);
+    return `<div class="req"><div class="req-main"><div class="req-dates">${esc(n)}</div>
+      <div class="req-meta">${dem.length} demande${dem.length>1?'s':''} · ${j} jour${j>1?'s':''} ouvré${j>1?'s':''} validé${j>1?'s':''}</div>
+    </div></div>`;}).join(''):'<div class="empty">Aucune personne active.</div>';
 }
 
-employeesRef.once("value", snap => { if (snap.val() === null) employeesRef.set(DEFAULT_EMPLOYEES); });
-directionRef.once("value", snap => { if (snap.val() === null) directionRef.set(DEFAULT_DIRECTION); });
-
-function buildUserSelect(){
-  userSelect.innerHTML = `<option value="">Select your name</option>` +
-    employees.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join("");
-  userSelect.value = employees.includes(currentUser) ? currentUser : "";
+/* ── actions ── */
+async function decider(id,status){
+  const u={status,decidedBy:user.email.split('@')[0],decidedAt:Date.now()};
+  requests[id]={...requests[id],...u}; renderDir();
+  try{ await update(child(ref(db,R_REQ),id),u); }catch(e){ alert('Non enregistré : '+e.message); }
+}
+async function sauver(id){
+  const s=$(`#e-s-${id}`).value,e2=$(`#e-e-${id}`).value;
+  if(!s||!e2||new Date(e2)<new Date(s)){alert('Dates invalides.');return;}
+  const u={startDate:s,endDate:e2,type:$(`#e-t-${id}`).value,note:$(`#e-n-${id}`).value.trim()};
+  requests[id]={...requests[id],...u}; editingId=null; renderDir();
+  try{ await update(child(ref(db,R_REQ),id),u); }catch(err){ alert('Non enregistré : '+err.message); }
+}
+async function retirer(id){
+  const r=requests[id];
+  if(!r||r.name!==currentUser||r.status!=='pending')return;
+  if(!confirm('Retirer cette demande ? Elle sera marquée comme annulée.'))return;
+  const u={status:'cancelled',decidedBy:null,decidedAt:null,cancelledAt:Date.now()};
+  requests[id]={...r,...u}; renderMe();
+  try{ await update(child(ref(db,R_REQ),id),u); }catch(e){ alert('Non enregistré : '+e.message); }
 }
 
-function toggleView(){
-  if (currentUser){ placeholder.classList.add("hidden"); app.classList.remove("hidden"); }
-  else { placeholder.classList.remove("hidden"); app.classList.add("hidden"); }
-}
-
-userSelect.addEventListener("change", () => {
-  currentUser = userSelect.value;
-  localStorage.setItem("conges-user", currentUser);
-  toggleView();
-  renderList();
-});
-
-function renderList(){
-  if (!currentUser) return;
-  const mine = Object.entries(requests)
-    .filter(([, r]) => r.name === currentUser)
-    .sort((a,b) => b[1].createdAt - a[1].createdAt);
-
-  if (mine.length === 0){
-    listEl.innerHTML = `<div class="empty">No requests yet.</div>`;
-    return;
-  }
-  listEl.innerHTML = mine.map(([id, r]) => {
-    const decided = r.decidedBy
-      ? `<div class="req-meta">${r.status === "approved" ? "Approved" : "Rejected"} by ${esc(r.decidedBy)} · ${fmtDate(r.decidedAt)}</div>`
-      : "";
-    const withdrawBtn = r.status === "pending"
-      ? `<button class="act-btn withdraw" data-action="withdraw" data-id="${id}">Withdraw</button>`
-      : "";
-    return `
-      <div class="req">
-        <div class="req-main">
-          <div class="req-dates">${fmtDate(r.startDate)} → ${fmtDate(r.endDate)} <span style="font-weight:400;color:var(--muted);">(${daysLabel(r.startDate, r.endDate)}) · ${esc(r.type)}</span></div>
-          ${r.note ? `<div class="note-pill">${esc(r.note)}</div>` : ""}
-          ${decided}
-        </div>
-        <div class="req-right">
-          <span class="badge ${r.status}">${r.status}</span>
-          ${withdrawBtn}
-        </div>
-      </div>`;
-  }).join("");
-}
-
-// Withdraw = set status to "cancelled" (never deletes data).
-listEl.addEventListener("click", e => {
-  const btn = e.target.closest('[data-action="withdraw"]');
-  if (!btn) return;
-  const id = btn.dataset.id;
-  const r = requests[id];
-  if (!r || r.name !== currentUser || r.status !== "pending") return;
-  if (!confirm("Withdraw this request? It will be marked as cancelled.")) return;
-  const update = { status: "cancelled", decidedBy: null, decidedAt: null, cancelledAt: Date.now() };
-  requests[id] = { ...r, ...update };
-  renderList();
-  requestsRef.child(id).update(update).catch(err => alert("Could not save: " + err.message));
-});
-
-// ---- Form: listeners attached ONCE. ----
-const startDateEl = document.getElementById("startDate");
-const endDateEl = document.getElementById("endDate");
-const daysHint = document.getElementById("daysHint");
-const noteEl = document.getElementById("note");
-const typeEl = document.getElementById("leaveType");
-
-function updateHint(){
-  if (!startDateEl.value || !endDateEl.value){ daysHint.textContent = ""; return; }
-  if (new Date(endDateEl.value) < new Date(startDateEl.value)){
-    daysHint.textContent = "End date must be on or after start date.";
-    daysHint.style.color = "var(--danger)";
-  } else {
-    daysHint.textContent = daysLabel(startDateEl.value, endDateEl.value) + " requested.";
-    daysHint.style.color = "var(--muted)";
-  }
-}
-startDateEl.addEventListener("change", updateHint);
-endDateEl.addEventListener("change", updateHint);
-
-document.getElementById("submitBtn").addEventListener("click", () => {
-  if (!currentUser){ alert("Select your name first."); return; }
-  const start = startDateEl.value, end = endDateEl.value;
-  if (!start || !end || new Date(end) < new Date(start)){
-    alert("Please pick a valid date range.");
-    return;
-  }
-  const newReq = {
-    name: currentUser, startDate: start, endDate: end,
-    type: typeEl.value, note: noteEl.value.trim(),
-    status: "pending", createdAt: Date.now(),
-    decidedBy: null, decidedAt: null
-  };
-  const newRef = requestsRef.push();
-  requests[newRef.key] = newReq;
-  renderList();
-  newRef.set(newReq).catch(err => {
-    delete requests[newRef.key];
-    renderList();
-    alert("Could not save the request: " + err.message);
-  });
-  startDateEl.value = ""; endDateEl.value = "";
-  noteEl.value = ""; typeEl.selectedIndex = 0;
-  daysHint.textContent = "";
-});
-
-// ---- Firebase sync ----
-employeesRef.on("value", snap => {
-  employees = snap.val() || DEFAULT_EMPLOYEES;
-  buildUserSelect();
-  toggleView();
-});
-requestsRef.on("value", snap => {
-  requests = snap.val() || {};
-  statusLine.textContent = "Synced";
-  renderList();
-}, err => {
-  statusLine.textContent = "Connection error: " + err.message;
-});
-
-toggleView();
+/* ── formulaire ── */
+const sd=$('#startDate'), ed=$('#endDate'), hint=$('#daysHint');
+const maj=()=>{
+  if(!sd.value||!ed.value){hint.textContent='';return;}
+  if(new Date(ed.value)<new Date(sd.value)){hint.textContent='La date de fin doit suivre la date de début.';hint.style.color='var(--danger)';}
+  else{hint.textContent=label(sd.value,ed.value)+' demandés.';hint.style.color='var(--muted)';}
+};
+sd.onchange=maj; ed.onchange=maj;
+$('#submitBtn').onclick=async()=>{
+  if(!currentUser){alert('Sélectionne ton nom.');return;}
+  if(!sd.value||!ed.value||new Date(ed.value)<new Date(sd.value)){alert('Choisis une période valide.');return;}
+  const req={name:currentUser,startDate:sd.value,endDate:ed.value,type:$('#leaveType').value,
+    note:$('#note').value.trim(),status:'pending',createdAt:Date.now(),decidedBy:null,decidedAt:null};
+  const nr=push(ref(db,R_REQ));
+  requests[nr.key]=req; renderMe();
+  try{ await set(nr,req); }catch(e){ delete requests[nr.key]; renderMe(); alert('Non enregistré : '+e.message); }
+  sd.value='';ed.value='';$('#note').value='';$('#leaveType').selectedIndex=0;hint.textContent='';
+};
 </script>
 </body>
 </html>
