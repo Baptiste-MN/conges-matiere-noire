@@ -114,7 +114,7 @@
           <div><label>Date de fin</label><input type="date" id="endDate"></div>
           <div class="full"><label>Type</label>
             <select class="field" id="leaveType">
-              <option>Congés payés</option><option>RTT</option><option>Sans solde</option>
+              <option>Congés payés</option><option>Sans solde</option>
               <option>Arrêt maladie</option><option>Autre</option>
             </select></div>
           <div class="full"><label>Note (facultatif)</label><textarea id="note" placeholder="Un contexte utile pour la direction…"></textarea></div>
@@ -323,7 +323,7 @@ function renderDir(){
           <div><label>Début</label><input type="date" id="e-s-${id}" value="${r.startDate}"></div>
           <div><label>Fin</label><input type="date" id="e-e-${id}" value="${r.endDate}"></div>
           <div class="full"><label>Type</label><select class="field" id="e-t-${id}">
-            ${['Congés payés','RTT','Sans solde','Arrêt maladie','Autre'].map(t=>`<option${t===r.type?' selected':''}>${t}</option>`).join('')}</select></div>
+            ${['Congés payés','Sans solde','Arrêt maladie','Autre'].map(t=>`<option${t===r.type?' selected':''}>${t}</option>`).join('')}</select></div>
           <div class="full"><label>Note</label><textarea id="e-n-${id}">${esc(r.note||'')}</textarea></div>
         </div>
         <div class="req-right"><button class="act-btn approve" data-save="${id}">Enregistrer</button>
